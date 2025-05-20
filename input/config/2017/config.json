@@ -1,0 +1,24 @@
+{
+  "Muon": {
+    "Leading_Pt": 52,
+    "Subleading_Pt": 15,
+    "Eta": 2.4,
+    "Id": "global",
+    "TkIso": 0.1,
+    "Trigger": {
+      "Default": ["HLT_Mu50", "HLT_OldMu100", "HLT_TkMu100"],
+      "Exception": {
+        "SingleMuon_Run2017B": ["HLT_Mu50"]
+      }
+    },
+    "ZMass": 200
+  },
+
+  "IsMC": {
+    "SingleMuon_Run2017B": false,
+    "SingleMuon_Run2017C": false,
+    "SingleMuon_Run2017D": false,
+    "SingleMuon_Run2017E": false,
+    "SingleMuon_Run2017F": false
+  }
+}
