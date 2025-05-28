@@ -57,10 +57,10 @@ RM = /cvmfs/sft.cern.ch/lcg/releases/CMake/3.26.2-0664a/x86_64-el9-gcc11-opt/bin
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /u/user/haeun/CMSAnalysis/HighBoostedZ
+CMAKE_SOURCE_DIR = /u/user/haeun/CMSAnalysis/HighBoostedZ/HighPt/HighBoostedZ
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /u/user/haeun/CMSAnalysis/HighBoostedZ/build
+CMAKE_BINARY_DIR = /u/user/haeun/CMSAnalysis/HighBoostedZ/HighPt/HighBoostedZ/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -68,7 +68,7 @@ CMAKE_BINARY_DIR = /u/user/haeun/CMSAnalysis/HighBoostedZ/build
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/cvmfs/sft.cern.ch/lcg/releases/CMake/3.26.2-0664a/x86_64-el9-gcc11-opt/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/usr/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /u/user/haeun/CMSAnalysis/HighBoostedZ/build/CMakeFiles /u/user/haeun/CMSAnalysis/HighBoostedZ/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /u/user/haeun/CMSAnalysis/HighBoostedZ/HighPt/HighBoostedZ/build/CMakeFiles /u/user/haeun/CMSAnalysis/HighBoostedZ/HighPt/HighBoostedZ/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /u/user/haeun/CMSAnalysis/HighBoostedZ/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /u/user/haeun/CMSAnalysis/HighBoostedZ/HighPt/HighBoostedZ/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
