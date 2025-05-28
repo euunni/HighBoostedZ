@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BASE_DIR="/u/user/haeun/CMSAnalysis/HighBoostedZ/output/250517"
-ERAS=("2016_preVFP" "2016_postVFP" "2017" "2018")
+BASE_DIR="./output/250517"
+ERAS=("2016_postVFP" "2016_preVFP" "2017" "2018")
 
 for era in "${ERAS[@]}"; do
   echo "Processing era: $era"
@@ -12,7 +12,7 @@ for era in "${ERAS[@]}"; do
     fi
     
     sample=$(basename "$sample_dir")
-    echo "  Processing sample: $sample"
+    echo -e "Processing sample: $sample\n"
     
     combined_dir="$sample_dir/combined"
     mkdir -p "$combined_dir"
@@ -27,7 +27,7 @@ for era in "${ERAS[@]}"; do
     done
     
     if [ -z "$pattern" ]; then
-      echo "    No root files found or pattern couldn't be determined"
+      echo -e "No root files found or pattern couldn't be determined.\n"
       continue
     fi
     
@@ -37,9 +37,9 @@ for era in "${ERAS[@]}"; do
   done
 done
 
-
+# Final combination
 for era in "${ERAS[@]}"; do
-  echo "Processing final combination for era: $era"
+  echo -e "\nProcessing final combination for era: $era\n"
   
   dy_files=""
   st_files=""
@@ -104,10 +104,10 @@ for era in "${ERAS[@]}"; do
   fi
   
   if [ ! -z "$data_files" ]; then
-    hadd_command="hadd -f $final_dir/AllData_$era.root $data_files"
+    hadd_command="hadd -f $final_dir/Data_$era.root $data_files"
     echo "  $hadd_command"
     eval "$hadd_command"
   fi
 done
 
-echo "All hadd operations completed!"
+echo -e "\nAll hadd operations completed!"
