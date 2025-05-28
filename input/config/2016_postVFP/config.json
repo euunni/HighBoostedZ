@@ -11,6 +11,10 @@
     "ZMass": 200
   },
 
+  "Processing": {
+    "FilesPerJob": 10
+  },
+
   "IsMC": {
     "SingleMuon_Run2016F": false,
     "SingleMuon_Run2016G": false,

@@ -20,7 +20,8 @@ class NtupleReader
 public:
   NtupleReader() :
     fChain(nullptr),
-    fReader(nullptr)
+    fReader(nullptr),
+    fFilesPerJob(10)
   {
     fChain = new TChain("Events");
   }
@@ -28,7 +29,7 @@ public:
     delete fChain;
   }
 
-  void Init(const std::string& sampleName, const std::string& era);
+  void Init(const std::string& sampleName, const std::string& era, const int& idx = 0, const int& filesPerJob = 10);
   // bool Next() { return fReader->Next(); }
 
   TChain* GetChain() { return fChain; }
@@ -43,9 +44,10 @@ private:
   std::string fSampleName;
   std::string fEra;
   int fNFiles;
+  int fFilesPerJob;
   TTreeReaderValue<float>* genWeight;
 
-  bool GetFile(const std::string& sampleName, const std::string& era);
+  bool GetFile(const std::string& sampleName, const std::string& era, const int& idx, const int& filesPerJob);
 };
 
 #endif

@@ -19,18 +19,21 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   fEra = era;
   fIdx = idx;
   
-  // Initialize NtupleReader
+  std::string configPath = "../input/config/" + era + "/config.json";
+  fMuonConfig = Selection::Load(configPath);
+  
+  int filesPerJob = 10; // default
+  if (fMuonConfig.j.contains("Processing") && fMuonConfig.j["Processing"].contains("FilesPerJob")) {
+    filesPerJob = fMuonConfig.j["Processing"]["FilesPerJob"].get<int>();
+  }
+  
   fNtupleReader = std::make_unique<NtupleReader>();
-  fNtupleReader->Init(sampleName, era);
+  fNtupleReader->Init(sampleName, era, idx, filesPerJob);
   fReader = fNtupleReader->GetReader(); 
   fMuon->Init(fReader);
   
-  system(("mkdir -p ../output/250517/" + era + "/" + sampleName).c_str());
-  fOutputName = "../output/250517/" + era + "/" + sampleName + "/" + sampleName + "_" + std::to_string(idx) + ".root";
-
-  // Load config
-  std::string configPath = "../input/config/" + era + "/config.json";
-  fMuonConfig = Selection::Load(configPath);
+  system(("mkdir -p ../output/250526/" + era + "/" + sampleName).c_str());
+  fOutputName = "../output/250526/" + era + "/" + sampleName + "/" + sampleName + "_" + std::to_string(idx) + ".root";
 
   fIsMC = fMuonConfig.j["IsMC"].contains(sampleName) ? 
           fMuonConfig.j["IsMC"][sampleName].get<bool>() : true;  
@@ -54,6 +57,7 @@ void Analyzer::Run()
   
   std::cout << "Processing " << fSampleName << " (" << fEra << ") with " << nEntries << " events" << std::endl;
 
+  double totalWeight = 0.;
   // Event loop
   for (int entry = 0; entry < nEntries; ++entry) {
     fReader->SetEntry(entry);
@@ -70,7 +74,9 @@ void Analyzer::Run()
         evtWeight = (evtWeight > 0) ? 1. : -1.;
       }
     }
-    
+
+    totalWeight += evtWeight;
+
     // Reco muons
     auto fMuon4Vec = fMuon->Get4Vec();
     auto fMuonCharge = fMuon->GetCharge();
@@ -176,6 +182,8 @@ void Analyzer::Run()
       }
     }
   } // End of event loop
+
+  h_TotalWeight->SetBinContent(1, totalWeight);
 }
 
 void Analyzer::End()
@@ -185,6 +193,8 @@ void Analyzer::End()
 
 void Analyzer::SetHist()
 {
+  h_TotalWeight = new TH1F("h_total_weight", "Total weight;Bin;Total weight", 1, 0, 1);
+
   h_MuonPt = new TH1F("h_muon_pt", "Muon pT;p_{T} [GeV];Events", 10000, 0, 10000);
   h_MuonEta = new TH1F("h_muon_eta", "Muon #eta;#eta;Events", 60, -3, 3);
   h_MuonPhi = new TH1F("h_muon_phi", "Muon #phi;#phi;Events", 24, -M_PI, M_PI);
@@ -244,6 +254,8 @@ void Analyzer::FillHist()
 void Analyzer::WriteHist()
 {
   TFile outputFile(fOutputName.c_str(), "RECREATE");
+
+  h_TotalWeight->Write();
   
   h_MuonPt->Write();
   h_MuonEta->Write();

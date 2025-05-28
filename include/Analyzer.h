@@ -38,6 +38,8 @@ private:
   int fIdx;
   Selection fMuonConfig;
   bool fIsMC;
+
+  TH1F* h_TotalWeight;
   
   TH1F* h_MuonPt;
   TH1F* h_MuonEta;
