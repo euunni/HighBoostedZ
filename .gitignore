@@ -1,1 +1,4 @@
 output/
+plot/
+build/
+install/

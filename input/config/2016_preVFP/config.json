@@ -1,17 +1,18 @@
 {
   "Muon": {
-    "Leading_Pt": 52,
-    "Subleading_Pt": 15,
+    "Leading_Pt": 26,
+    "Subleading_Pt": 10,
     "Eta": 2.4,
-    "Id": "global",
-    "TkIso": 0.1,
+    "Id": "Tight",
+    "PFIso": 0.15,
     "Trigger": {
-      "Default": ["HLT_Mu50", "HLT_TkMu50"],
-      "Exception": {
-        "SingleMuon_Run2016B_APV_ver2": ["HLT_Mu50"]
-      }
+      "Default": ["HLT_IsoMu24", "HLT_IsoTkMu24"]
     },
-    "ZMass": 200
+    "ZMass": [60, 120]
+  },
+
+  "Processing": {
+    "FilesPerJob": 10
   },
 
   "IsMC": {

@@ -38,6 +38,8 @@ private:
   int fIdx;
   Selection fMuonConfig;
   bool fIsMC;
+
+  TH1F* h_TotalWeight;
   
   TH1F* h_MuonPt;
   TH1F* h_MuonEta;
@@ -46,10 +48,6 @@ private:
   TH1F* h_MuonPt_afterTrigger;
   TH1F* h_MuonEta_afterTrigger;
   TH1F* h_MuonPhi_afterTrigger;
-
-  TH1F* h_MuonPt_selected;
-  TH1F* h_MuonEta_selected;
-  TH1F* h_MuonPhi_selected;
 
   TH1F* h_MuonPt_afterPt;
   TH1F* h_MuonEta_afterPt;
@@ -63,9 +61,9 @@ private:
   TH1F* h_MuonEta_afterPtEtaId;
   TH1F* h_MuonPhi_afterPtEtaId;
 
-  TH1F* h_MuonPt_afterPtEtaIdTkIso;
-  TH1F* h_MuonEta_afterPtEtaIdTkIso;
-  TH1F* h_MuonPhi_afterPtEtaIdTkIso;
+  TH1F* h_MuonPt_afterPtEtaIdPFIso;
+  TH1F* h_MuonEta_afterPtEtaIdPFIso;
+  TH1F* h_MuonPhi_afterPtEtaIdPFIso;
 
   TH1F* h_SingleMuonPt;
   TH1F* h_SingleMuonEta;
@@ -84,10 +82,22 @@ private:
   TH1F* h_DimuonPhi;
   TH1F* h_DimuonMass;
 
-  TH1F* h_DimuonPt_MassCut;
-  TH1F* h_DimuonRapidity_MassCut;
-  TH1F* h_DimuonPhi_MassCut;
-  TH1F* h_DimuonMass_MassCut;
+  TH1F* h_SingleMuonPt_ZMassCut;
+  TH1F* h_SingleMuonEta_ZMassCut;
+  TH1F* h_SingleMuonPhi_ZMassCut;
+
+  TH1F* h_LeadingMuonPt_ZMassCut;
+  TH1F* h_LeadingMuonEta_ZMassCut;
+  TH1F* h_LeadingMuonPhi_ZMassCut;
+
+  TH1F* h_SubleadingMuonPt_ZMassCut;
+  TH1F* h_SubleadingMuonEta_ZMassCut;
+  TH1F* h_SubleadingMuonPhi_ZMassCut;
+
+  TH1F* h_DimuonPt_ZMassCut;
+  TH1F* h_DimuonRapidity_ZMassCut;
+  TH1F* h_DimuonPhi_ZMassCut;
+  TH1F* h_DimuonMass_ZMassCut;
   
   void SetHist();
   void FillHist();

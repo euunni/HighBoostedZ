@@ -9,16 +9,15 @@
 void Muon::Init(TTreeReader* fReader) {
 
   Muon_pt = new TTreeReaderArray<float>(*fReader, "Muon_pt");
-  Muon_tunepRelPt = new TTreeReaderArray<float>(*fReader, "Muon_tunepRelPt");
   Muon_eta = new TTreeReaderArray<float>(*fReader, "Muon_eta");
   Muon_phi = new TTreeReaderArray<float>(*fReader, "Muon_phi");
   Muon_mass = new TTreeReaderArray<float>(*fReader, "Muon_mass");
   Muon_charge = new TTreeReaderArray<int>(*fReader, "Muon_charge");
-  Muon_highPtId = new TTreeReaderArray<unsigned char>(*fReader, "Muon_highPtId");
-  Muon_tkRelIso = new TTreeReaderArray<float>(*fReader, "Muon_tkRelIso");
+  Muon_tightId = new TTreeReaderArray<bool>(*fReader, "Muon_tightId");
+  Muon_pfRelIso04_all = new TTreeReaderArray<float>(*fReader, "Muon_pfRelIso04_all");
   Muon_nTrackerLayers = new TTreeReaderArray<int>(*fReader, "Muon_nTrackerLayers");
 
-  const std::vector<std::string> commonTriggers = {"HLT_Mu50", "HLT_TkMu50", "HLT_OldMu100", "HLT_TkMu100"};
+  const std::vector<std::string> commonTriggers = {"HLT_IsoMu24", "HLT_IsoTkMu24", "HLT_IsoMu27"};
   TTree* tree = fReader->GetTree();
   
   for (const auto& trigger : commonTriggers) {
@@ -33,14 +32,12 @@ std::vector<TLorentzVector> Muon::Get4Vec() {
   
   for (int i = 0; i < Muon_pt->GetSize(); i++) {
     float pt = Muon_pt->At(i);
-    float tunepRelPt = Muon_tunepRelPt->At(i);
     float eta = Muon_eta->At(i);
     float phi = Muon_phi->At(i);
     float mass = Muon_mass->At(i);
 
 		TLorentzVector muon;
-		muon.SetPtEtaPhiM(pt * tunepRelPt, eta, phi, mass);
-		// muon.SetPtEtaPhiM(pt, eta, phi, mass);
+		muon.SetPtEtaPhiM(pt, eta, phi, mass);
 		fMuon4Vec.push_back(muon);
 	}
 	return fMuon4Vec;
@@ -78,7 +75,6 @@ bool Muon::PassTriggers(const std::vector<std::string>& triggerList) {
   return false;
 }
 
-// std::vector<std::pair<int, TLorentzVector>> Muon::GetSelectedMuons(const Selection& config) {
 std::vector<std::pair<int, TLorentzVector>> Muon::GetSelectedMuons(const Selection& config, const SelectionOptions& options = SelectionOptions()) {
   std::vector<std::pair<int, TLorentzVector>> selectedMuons;
   selectedMuons.reserve(fMuon4Vec.size());
@@ -86,20 +82,12 @@ std::vector<std::pair<int, TLorentzVector>> Muon::GetSelectedMuons(const Selecti
   
   for (size_t i = 0; i < fMuon4Vec.size(); i++) {
     const auto& muon = fMuon4Vec[i];
-
-    // if (muon.Pt() > config.Subleading_Pt && 
-    //     std::abs(muon.Eta()) < config.Eta &&
-    //     Muon_highPtId->At(i) >= config.Id &&
-    //     Muon_tkRelIso->At(i) < config.TkIso) {
-    //   selectedMuons.push_back({i, muon});
-    // }
-
     bool passSelection = true;
 
     if (options.applyPtCut && muon.Pt() <= config.Subleading_Pt) passSelection = false;
     if (options.applyEtaCut && std::abs(muon.Eta()) >= config.Eta) passSelection = false;
-    if (options.applyIdCut && Muon_highPtId->At(i) != config.Id) passSelection = false;
-    if (options.applyTkIsoCut && Muon_tkRelIso->At(i) >= config.TkIso) passSelection = false;
+    if (options.applyIdCut && !Muon_tightId->At(i)) passSelection = false;
+    if (options.applyPFIsoCut && Muon_pfRelIso04_all->At(i) >= config.PFIso) passSelection = false;
     if (passSelection) {
       selectedMuons.push_back({i, muon});
     }
@@ -108,14 +96,8 @@ std::vector<std::pair<int, TLorentzVector>> Muon::GetSelectedMuons(const Selecti
   return selectedMuons;
 }
 
-DimuonPair Muon::GetDimuon(const Selection& config) {
+DimuonPair Muon::GetDimuon(const Selection& config, const SelectionOptions& options = SelectionOptions()) {
   DimuonPair dimuon;
-  // auto selectedMuons = GetSelectedMuons(config);
-  SelectionOptions options;
-  options.applyPtCut = true;
-  options.applyEtaCut = true;
-  options.applyIdCut = true;
-  options.applyTkIsoCut = true;
   auto selectedMuons = GetSelectedMuons(config, options);
   
   GetCharge(); 
@@ -143,6 +125,15 @@ DimuonPair Muon::GetDimuon(const Selection& config) {
     dimuon.leading = &fMuon4Vec[leadIdx];
     dimuon.subleading = &fMuon4Vec[subleadIdx];
     dimuon.dimuon = *dimuon.leading + *dimuon.subleading;
+
+    if (options.applyZMassCut) {
+      double dimuonMass = dimuon.dimuon.M();
+      if (!(dimuonMass > config.ZMass[0] && dimuonMass < config.ZMass[1])) {
+        dimuon.isValid = false;
+        return dimuon;
+      }
+    }
+    
     dimuon.isValid = true;
   }
   
