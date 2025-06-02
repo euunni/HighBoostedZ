@@ -74,8 +74,8 @@ public:
   std::vector<int> GetCharge();
   std::vector<std::string> GetTriggers(const Selection& config, const std::string& sampleName);
   bool PassTriggers(const std::vector<std::string>& triggerList);
-  std::vector<std::pair<int, TLorentzVector>> GetSelectedMuons(const Selection& config, const SelectionOptions& options);
-  DimuonPair GetDimuon(const Selection& config, const SelectionOptions& options);
+  std::vector<std::pair<int, TLorentzVector>> GetSelectedMuons(const Selection& config);
+  DimuonPair GetDimuon(const Selection& config);
 
 private:
   TTreeReaderArray<float>* Muon_pt;

@@ -2,3 +2,4 @@ output/
 plot/
 build/
 install/
+.vscode/

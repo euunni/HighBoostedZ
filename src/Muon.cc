@@ -36,11 +36,11 @@ std::vector<TLorentzVector> Muon::Get4Vec() {
     float phi = Muon_phi->At(i);
     float mass = Muon_mass->At(i);
 
-		TLorentzVector muon;
-		muon.SetPtEtaPhiM(pt, eta, phi, mass);
-		fMuon4Vec.push_back(muon);
-	}
-	return fMuon4Vec;
+    TLorentzVector muon;
+    muon.SetPtEtaPhiM(pt, eta, phi, mass);
+    fMuon4Vec.push_back(muon);
+  }
+  return fMuon4Vec;
 }
 
 std::vector<int> Muon::GetCharge() {
@@ -75,20 +75,18 @@ bool Muon::PassTriggers(const std::vector<std::string>& triggerList) {
   return false;
 }
 
-std::vector<std::pair<int, TLorentzVector>> Muon::GetSelectedMuons(const Selection& config, const SelectionOptions& options = SelectionOptions()) {
+std::vector<std::pair<int, TLorentzVector>> Muon::GetSelectedMuons(const Selection& config) {
   std::vector<std::pair<int, TLorentzVector>> selectedMuons;
   selectedMuons.reserve(fMuon4Vec.size());
   Get4Vec();
   
   for (size_t i = 0; i < fMuon4Vec.size(); i++) {
     const auto& muon = fMuon4Vec[i];
-    bool passSelection = true;
 
-    if (options.applyPtCut && muon.Pt() <= config.Subleading_Pt) passSelection = false;
-    if (options.applyEtaCut && std::abs(muon.Eta()) >= config.Eta) passSelection = false;
-    if (options.applyIdCut && !Muon_tightId->At(i)) passSelection = false;
-    if (options.applyPFIsoCut && Muon_pfRelIso04_all->At(i) >= config.PFIso) passSelection = false;
-    if (passSelection) {
+    if (muon.Pt() > config.Subleading_Pt && 
+        std::abs(muon.Eta()) < config.Eta &&
+        Muon_tightId->At(i) &&
+        Muon_pfRelIso04_all->At(i) < config.PFIso) {
       selectedMuons.push_back({i, muon});
     }
   }
@@ -96,11 +94,11 @@ std::vector<std::pair<int, TLorentzVector>> Muon::GetSelectedMuons(const Selecti
   return selectedMuons;
 }
 
-DimuonPair Muon::GetDimuon(const Selection& config, const SelectionOptions& options = SelectionOptions()) {
+DimuonPair Muon::GetDimuon(const Selection& config) {
   DimuonPair dimuon;
-  auto selectedMuons = GetSelectedMuons(config, options);
+  auto selectedMuons = GetSelectedMuons(config);
   
-  GetCharge(); 
+  GetCharge();
 
   int leadIdx = -1, subleadIdx = -1;
 
@@ -126,15 +124,10 @@ DimuonPair Muon::GetDimuon(const Selection& config, const SelectionOptions& opti
     dimuon.subleading = &fMuon4Vec[subleadIdx];
     dimuon.dimuon = *dimuon.leading + *dimuon.subleading;
 
-    if (options.applyZMassCut) {
-      double dimuonMass = dimuon.dimuon.M();
-      if (!(dimuonMass > config.ZMass[0] && dimuonMass < config.ZMass[1])) {
-        dimuon.isValid = false;
-        return dimuon;
-      }
+    double dimuonMass = dimuon.dimuon.M();
+    if (dimuonMass > config.ZMass[0] && dimuonMass < config.ZMass[1]) {
+      dimuon.isValid = true;
     }
-    
-    dimuon.isValid = true;
   }
   
   return dimuon;
