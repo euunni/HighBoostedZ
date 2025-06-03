@@ -11,16 +11,31 @@
         "HLT_IsoTkMu24"
       ]
     },
-    "ZMass": [60, 120]
+    "ZMass": [
+      60,
+      120
+    ]
   },
-
   "Processing": {
     "FilesPerJob": 10
   },
-  
   "IsMC": {
     "SingleMuon_Run2016F": false,
     "SingleMuon_Run2016G": false,
     "SingleMuon_Run2016H": false
+  },
+  "Normalization": {
+    "DYJetsToMuMu_M-50": 0.462908,
+    "DYJetsToTauTau_M-50_AtLeastOneEorMuDecay": 0.154082,
+    "ST_s-channel_4f_leptonDecays": 0.008922,
+    "ST_tW_antitop_5f_inclusiveDecays": 0.008023,
+    "ST_tW_top_5f_inclusiveDecays": 0.008242,
+    "ST_t-channel_anitop_4f_InclusiveDecays": 0.000687,
+    "ST_t-channel_top_4f_InclusiveDecays": 0.000336,
+    "TTTo2L2Nu": 0.000474,
+    "WJetsToLNu": 0.000212,
+    "WWTo2L2Nu": 0.005796,
+    "WZ": 0.061117,
+    "ZZ": 0.177633
   }
 }

@@ -12,18 +12,17 @@
 #include "TTreeReaderValue.h"
 #include "TTreeReaderArray.h"
 #include "TChain.h"
-#include "Muon.h"
 
 
 class NtupleReader
 {
 public:
   NtupleReader() :
-    fChain(nullptr),
+    fChain(new TChain("Events")),
     fReader(nullptr),
-    fFilesPerJob(10)
+    fNFiles(0),
+    fGenWeight(nullptr)
   {
-    fChain = new TChain("Events");
   }
   ~NtupleReader() {
     delete fChain;
@@ -31,7 +30,6 @@ public:
 
   void Init(const std::string& sampleName, const std::string& era, const int& idx = 0, const int& filesPerJob = 10);
   // bool Next() { return fReader->Next(); }
-
   TChain* GetChain() { return fChain; }
   TTreeReader* GetReader() { return fReader; }
   void SetMC();
@@ -41,11 +39,8 @@ public:
 private:
   TChain* fChain;
   TTreeReader* fReader;  
-  std::string fSampleName;
-  std::string fEra;
   int fNFiles;
-  int fFilesPerJob;
-  TTreeReaderValue<float>* genWeight;
+  TTreeReaderValue<float>* fGenWeight;
 
   bool GetFile(const std::string& sampleName, const std::string& era, const int& idx, const int& filesPerJob);
 };

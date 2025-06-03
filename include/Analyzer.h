@@ -2,61 +2,80 @@
 #define Analyzer_h 1
 
 #include "NtupleReader.h"
+#include "Utils/ConfigReader.h"
 #include "Muon.h"
 
 #include <string>
 #include <vector>
 #include <memory>
-#include "TH1.h"
-#include "TH2.h"
+#include "TH1D.h"
 
 
 class Analyzer
 {
 public:
   Analyzer() :
-    fMuon(new Muon())
+    fNtupleReader(nullptr),
+    fMuon(nullptr),
+    fSampleName(""),
+    fEra(""),
+    fIsMC(false),
+    fOutputName(""),
+    fNormFactor(1.)
   {
   }
-  ~Analyzer() {
-    delete fMuon;
-  }
+  ~Analyzer() = default;
 
   bool Init(const std::string& sampleName, const std::string& era, const int& idx);
   void Run();
   void End();
-  bool IsMC() { return fIsMC; }
 
 private:
   std::unique_ptr<NtupleReader> fNtupleReader;
+  std::unique_ptr<Muon> fMuon;
   TTreeReader* fReader;
-  Muon* fMuon;
-
+  Selection fConfig;
   std::string fSampleName;
   std::string fEra;
   std::string fOutputName;
-  int fIdx;
-  Selection fMuonConfig;
   bool fIsMC;
+  double fNormFactor;
+  
+  TH1D* h_TotalWeight;
 
-  TH1F* h_TotalWeight;
+  TH1D* h_SingleMuonPt;
+  TH1D* h_SingleMuonEta;
+  TH1D* h_SingleMuonPhi;
 
-  TH1F* h_SingleMuonPt;
-  TH1F* h_SingleMuonEta;
-  TH1F* h_SingleMuonPhi;
+  TH1D* h_LeadingMuonPt;
+  TH1D* h_LeadingMuonEta;
+  TH1D* h_LeadingMuonPhi;
 
-  TH1F* h_LeadingMuonPt;
-  TH1F* h_LeadingMuonEta;
-  TH1F* h_LeadingMuonPhi;
+  TH1D* h_SubleadingMuonPt;
+  TH1D* h_SubleadingMuonEta;
+  TH1D* h_SubleadingMuonPhi;
 
-  TH1F* h_SubleadingMuonPt;
-  TH1F* h_SubleadingMuonEta;
-  TH1F* h_SubleadingMuonPhi;
+  TH1D* h_DimuonPt;
+  TH1D* h_DimuonRapidity;
+  TH1D* h_DimuonPhi;
+  TH1D* h_DimuonMass;
 
-  TH1F* h_DimuonPt;
-  TH1F* h_DimuonRapidity;
-  TH1F* h_DimuonPhi;
-  TH1F* h_DimuonMass;
+  TH1D* h_SingleMuonPt_afterNorm;
+  TH1D* h_SingleMuonEta_afterNorm;
+  TH1D* h_SingleMuonPhi_afterNorm;
+
+  TH1D* h_LeadingMuonPt_afterNorm;
+  TH1D* h_LeadingMuonEta_afterNorm;
+  TH1D* h_LeadingMuonPhi_afterNorm;
+
+  TH1D* h_SubleadingMuonPt_afterNorm;
+  TH1D* h_SubleadingMuonEta_afterNorm;
+  TH1D* h_SubleadingMuonPhi_afterNorm;
+
+  TH1D* h_DimuonPt_afterNorm;
+  TH1D* h_DimuonRapidity_afterNorm;
+  TH1D* h_DimuonPhi_afterNorm;
+  TH1D* h_DimuonMass_afterNorm;
   
   void SetHist();
   void FillHist();

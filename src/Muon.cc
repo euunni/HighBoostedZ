@@ -7,7 +7,6 @@
 
 
 void Muon::Init(TTreeReader* fReader) {
-
   Muon_pt = new TTreeReaderArray<float>(*fReader, "Muon_pt");
   Muon_eta = new TTreeReaderArray<float>(*fReader, "Muon_eta");
   Muon_phi = new TTreeReaderArray<float>(*fReader, "Muon_phi");

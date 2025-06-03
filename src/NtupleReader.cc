@@ -11,18 +11,13 @@
 
 void NtupleReader::Init(const std::string& sampleName, const std::string& era, const int& idx, const int& filesPerJob)
 {
-  fSampleName = sampleName;
-  fEra = era;
-  fFilesPerJob = filesPerJob;
-  
   GetFile(sampleName, era, idx, filesPerJob);
-
   fReader = new TTreeReader(fChain);
 }
 
 bool NtupleReader::GetFile(const std::string& sampleName, const std::string& era, const int& idx, const int& filesPerJob) {
     
-  std::string inputDir = "../input/" + era + "/" + sampleName;
+  std::string inputDir = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/input/" + era + "/" + sampleName;
   fNFiles = 0;
   
   try {
@@ -84,9 +79,9 @@ std::string NtupleReader::GetSample() const {
 }
 
 void NtupleReader::SetMC() {
-  genWeight = new TTreeReaderValue<float>(*fReader, "genWeight");
+  fGenWeight = new TTreeReaderValue<float>(*fReader, "genWeight");
 }
 
 TTreeReaderValue<float>* NtupleReader::GetGenWeight() {
-  return genWeight;
+  return fGenWeight;
 }

@@ -50,7 +50,7 @@ def main():
         
         samples = load_sample(era)
         for sample in samples:
-            list_dir = f"./../input/{era}/{sample}"
+            list_dir = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/input/{era}/{sample}"
             create_jobs(era=era, sample=sample, list_dir=list_dir, files_per_job=args.nfiles)
 
 if __name__ == "__main__":

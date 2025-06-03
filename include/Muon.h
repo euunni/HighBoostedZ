@@ -1,6 +1,8 @@
 #ifndef Muon_h
 #define Muon_h
 
+#include "Utils/ConfigReader.h"
+
 #include <iostream>
 #include <algorithm>
 #include <fstream>
@@ -13,12 +15,12 @@
 using json = nlohmann::json;
 
 
-struct SelectionOptions {
-  bool applyPtCut = false;
-  bool applyEtaCut = false;
-  bool applyIdCut = false;
-  bool applyPFIsoCut = false;
-  bool applyZMassCut = false;
+struct SelectionOp {
+  bool doPt = false;
+  bool doEta = false;
+  bool doId = false;
+  bool doPFIso = false;
+  bool doZMass = false;
 };
 
 struct Selection {
@@ -32,8 +34,7 @@ struct Selection {
 
   static Selection Load(const std::string& filename) {
     Selection config;
-    std::ifstream file(filename);
-    file >> config.j;
+    config.j = ConfigReader::LoadConfig(filename);
     
     config.Leading_Pt = config.j["Muon"]["Leading_Pt"].get<double>();
     config.Subleading_Pt = config.j["Muon"]["Subleading_Pt"].get<double>();
@@ -41,6 +42,7 @@ struct Selection {
     config.Id = config.j["Muon"]["Id"].get<std::string>();  
     config.PFIso = config.j["Muon"]["PFIso"].get<double>();
     config.ZMass = config.j["Muon"]["ZMass"].get<std::vector<double>>();
+
     return config;
   }
 };
@@ -61,6 +63,9 @@ public:
     Muon_phi = nullptr;
     Muon_mass = nullptr;
     Muon_charge = nullptr;
+    Muon_tightId = nullptr;
+    Muon_pfRelIso04_all = nullptr;
+    Muon_nTrackerLayers = nullptr;
   }
   ~Muon() {
     for (auto& pair : triggerMap) {

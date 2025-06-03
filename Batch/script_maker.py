@@ -15,7 +15,7 @@ def split_list(lst, split_size):
 
 def create_jobs(era, sample, list_dir, files_per_job):
     base_dir = os.getcwd()
-    output_base = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250526/{era}/{sample}"
+    output_base = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250602_NormInMain/root/{era}/{sample}"
     submit_dir = os.path.join(output_base, "Sub")
     log_dir = os.path.join(output_base, "Log")
 
@@ -39,8 +39,8 @@ def create_jobs(era, sample, list_dir, files_per_job):
         with open(sh_path, "w") as sh:
             sh.write("#!/bin/bash\n")
             sh.write("source /u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/envset.sh\n")
-            sh.write("cd /u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/install\n")
-            sh.write(f"./bin/Analyzer {sample} {era} {idx}\n")
+            sh.write("cd /u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/install/bin\n")
+            sh.write(f"./Analyzer {sample} {era} {idx}\n")
 
         os.chmod(sh_path, 0o755)
 
@@ -53,7 +53,7 @@ def create_jobs(era, sample, list_dir, files_per_job):
             sub.write(f"Log    = {log_dir}/{jobname}.log\n")
             sub.write("should_transfer_files = YES\n")
             sub.write("when_to_transfer_output = ON_EXIT\n")
-            sub.write(f"transfer_input_files = ../input/config/{era}/config.json\n")
+            sub.write(f"transfer_input_files = /u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/input/config/{era}/config.json\n")
             sub.write("queue 1\n")
 
         os.system(f"condor_submit {sub_path}")

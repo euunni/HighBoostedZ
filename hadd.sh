@@ -1,7 +1,8 @@
 #!/bin/bash
 
-BASE_DIR="./output"
-ERAS=("2016_postVFP" "2016_preVFP" "2017" "2018")
+BASE_DIR="./output/250602_NormInMain/root"
+# ERAS=("2016_postVFP" "2016_preVFP" "2017" "2018")
+ERAS=("2016_postVFP")
 
 for era in "${ERAS[@]}"; do
   echo -e "\n========================= Processing era: $era ========================="

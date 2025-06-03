@@ -10,6 +10,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/install" CACHE PATH "Installation directory" FORCE)
 endif()
 
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 # Find ROOT package
 find_package(ROOT REQUIRED COMPONENTS Core RIO Tree TreePlayer)
 include(${ROOT_USE_FILE})
@@ -22,6 +26,7 @@ add_library(AnalysisLib SHARED
   src/NtupleReader.cc
   src/Analyzer.cc
   src/Muon.cc
+  src/Utils/ConfigReader.cc
 )
 
 # Link ROOT libraries to the framework library
