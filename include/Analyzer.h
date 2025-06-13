@@ -4,6 +4,7 @@
 #include "NtupleReader.h"
 #include "Utils/ConfigReader.h"
 #include "Muon.h"
+#include "PUReweighting.h"
 
 #include <string>
 #include <vector>
@@ -40,6 +41,7 @@ private:
   std::string fOutputName;
   bool fIsMC;
   double fNormFactor;
+  std::unique_ptr<PUReweighting> fPUReweighting;
   
   TH1D* h_TotalWeight;
 
@@ -60,22 +62,22 @@ private:
   TH1D* h_DimuonPhi;
   TH1D* h_DimuonMass;
 
-  TH1D* h_SingleMuonPt_afterNorm;
-  TH1D* h_SingleMuonEta_afterNorm;
-  TH1D* h_SingleMuonPhi_afterNorm;
+  TH1D* h_SingleMuonPt_afterPU;
+  TH1D* h_SingleMuonEta_afterPU;
+  TH1D* h_SingleMuonPhi_afterPU;
 
-  TH1D* h_LeadingMuonPt_afterNorm;
-  TH1D* h_LeadingMuonEta_afterNorm;
-  TH1D* h_LeadingMuonPhi_afterNorm;
+  TH1D* h_LeadingMuonPt_afterPU;
+  TH1D* h_LeadingMuonEta_afterPU;
+  TH1D* h_LeadingMuonPhi_afterPU;
 
-  TH1D* h_SubleadingMuonPt_afterNorm;
-  TH1D* h_SubleadingMuonEta_afterNorm;
-  TH1D* h_SubleadingMuonPhi_afterNorm;
+  TH1D* h_SubleadingMuonPt_afterPU;
+  TH1D* h_SubleadingMuonEta_afterPU;
+  TH1D* h_SubleadingMuonPhi_afterPU;
 
-  TH1D* h_DimuonPt_afterNorm;
-  TH1D* h_DimuonRapidity_afterNorm;
-  TH1D* h_DimuonPhi_afterNorm;
-  TH1D* h_DimuonMass_afterNorm;
+  TH1D* h_DimuonPt_afterPU;
+  TH1D* h_DimuonRapidity_afterPU;
+  TH1D* h_DimuonPhi_afterPU;
+  TH1D* h_DimuonMass_afterPU;
   
   void SetHist();
   void FillHist();

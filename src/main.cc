@@ -5,6 +5,8 @@
 
 
 int main(int argc, char* argv[]) {
+  
+  gErrorIgnoreLevel = kError;
 
   std::string sampleName = argv[1];
   std::string era = argv[2];

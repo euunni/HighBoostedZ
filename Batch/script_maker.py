@@ -15,7 +15,7 @@ def split_list(lst, split_size):
 
 def create_jobs(era, sample, list_dir, files_per_job):
     base_dir = os.getcwd()
-    output_base = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250602_NormInMain/root/{era}/{sample}"
+    output_base = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250613_PUReweighting/root/{era}/{sample}"
     submit_dir = os.path.join(output_base, "Sub")
     log_dir = os.path.join(output_base, "Log")
 

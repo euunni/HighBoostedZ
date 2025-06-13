@@ -79,9 +79,6 @@ std::string NtupleReader::GetSample() const {
 }
 
 void NtupleReader::SetMC() {
-  fGenWeight = new TTreeReaderValue<float>(*fReader, "genWeight");
-}
-
-TTreeReaderValue<float>* NtupleReader::GetGenWeight() {
-  return fGenWeight;
+  genWeight = new TTreeReaderValue<float>(*fReader, "genWeight");
+  Pileup_nTrueInt = new TTreeReaderValue<float>(*fReader, "Pileup_nTrueInt");
 }

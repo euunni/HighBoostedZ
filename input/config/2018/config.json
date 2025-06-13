@@ -20,5 +20,10 @@
     "SingleMuon_Run2018B": false,
     "SingleMuon_Run2018C": false,
     "SingleMuon_Run2018D": false
+  },
+
+  "PU": {
+    "Data": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/Pileup/Data/PileupHistogram-goldenJSON-13tev-2018-69200ub-99bins.root",
+    "MC": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/Pileup/MC/MC_2018.root"
   }
 }

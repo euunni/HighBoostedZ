@@ -26,6 +26,7 @@ add_library(AnalysisLib SHARED
   src/NtupleReader.cc
   src/Analyzer.cc
   src/Muon.cc
+  src/PUReweighting.cc
   src/Utils/ConfigReader.cc
 )
 

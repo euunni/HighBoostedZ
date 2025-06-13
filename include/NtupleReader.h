@@ -21,7 +21,8 @@ public:
     fChain(new TChain("Events")),
     fReader(nullptr),
     fNFiles(0),
-    fGenWeight(nullptr)
+    genWeight(nullptr),
+    Pileup_nTrueInt(nullptr)
   {
   }
   ~NtupleReader() {
@@ -32,15 +33,18 @@ public:
   // bool Next() { return fReader->Next(); }
   TChain* GetChain() { return fChain; }
   TTreeReader* GetReader() { return fReader; }
-  void SetMC();
-  TTreeReaderValue<float>* GetGenWeight();
   std::string GetSample() const;
+  void SetMC();
+  TTreeReaderValue<float>* GetGenWeight() const { return genWeight; }
+  TTreeReaderValue<float>* GetPU() const { return Pileup_nTrueInt; }
 
 private:
   TChain* fChain;
   TTreeReader* fReader;  
   int fNFiles;
-  TTreeReaderValue<float>* fGenWeight;
+  
+  TTreeReaderValue<float>* genWeight;
+  TTreeReaderValue<float>* Pileup_nTrueInt;
 
   bool GetFile(const std::string& sampleName, const std::string& era, const int& idx, const int& filesPerJob);
 };

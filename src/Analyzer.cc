@@ -29,6 +29,9 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   fIsMC = fConfig.j["IsMC"].contains(sampleName) ? 
           fConfig.j["IsMC"][sampleName].get<bool>() : true;  
 
+  std::string dataPU = fConfig.j["PU"]["Data"].get<std::string>();
+  std::string mcPU = fConfig.j["PU"]["MC"].get<std::string>();
+
   // Initialize ntuple reader
   fNtupleReader = std::make_unique<NtupleReader>();
   fNtupleReader->Init(sampleName, era, idx, filesPerJob);
@@ -40,12 +43,16 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   fMuon = std::make_unique<Muon>();
   fMuon->Init(fReader);
 
-  // Get normalization factor
+  // Get pualization factor
   fNormFactor = ConfigReader::GetNormFactor(fConfig.j, fSampleName);
 
+  // Initialize PU reweighting
+  fPUReweighting = std::make_unique<PUReweighting>(dataPU, mcPU);
+
   // Set output file
-  system(("mkdir -p /u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250602_NormInMain/root/" + era + "/" + sampleName).c_str());
-  fOutputName = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250602_NormInMain/root/" + era + "/" + sampleName + "/" + sampleName + "_" + std::to_string(idx) + ".root";
+  std::string baseDir = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250613_PUReweighting/root";
+  system(("mkdir -p " + baseDir + "/" + era + "/" + sampleName).c_str());
+  fOutputName = baseDir + "/" + era + "/" + sampleName + "/" + sampleName + "_" + std::to_string(idx) + ".root";
 
   SetHist();
   
@@ -73,16 +80,19 @@ void Analyzer::Run()
     }
 
     double evtWeight = 1.;
+    double puWeight = 1.;
 
     if (fIsMC) {
       evtWeight = **(fNtupleReader->GetGenWeight());
       if (isNNLO) {
         evtWeight = (evtWeight > 0) ? 1. : -1.;
       }
+
+      puWeight = fPUReweighting->GetWeight(**(fNtupleReader->GetPU()));
     }
 
     totalWeight += evtWeight;
-    
+
     // Trigger selection
     std::vector<std::string> triggerList = fMuon->GetTriggers(fConfig, fSampleName);
     if (!(fMuon->PassTriggers(triggerList))) {
@@ -90,11 +100,11 @@ void Analyzer::Run()
     }
 
     // Find dimuons passing all selection criteria
-    double weight = evtWeight * fNormFactor;
+    double weight = evtWeight * fNormFactor * puWeight;
     auto dimuon = fMuon->GetDimuon(fConfig);
 
     if (dimuon.isValid) {
-      // Before normalization 
+      // Before pualization 
       h_SingleMuonPt->Fill(dimuon.leading->Pt(), evtWeight);
       h_SingleMuonEta->Fill(dimuon.leading->Eta(), evtWeight);
       h_SingleMuonPhi->Fill(dimuon.leading->Phi(), evtWeight);
@@ -115,26 +125,26 @@ void Analyzer::Run()
       h_DimuonPhi->Fill(dimuon.dimuon.Phi(), evtWeight);
       h_DimuonMass->Fill(dimuon.dimuon.M(), evtWeight);
 
-      // After normalization
-      h_SingleMuonPt_afterNorm->Fill(dimuon.leading->Pt(), weight);
-      h_SingleMuonEta_afterNorm->Fill(dimuon.leading->Eta(), weight);
-      h_SingleMuonPhi_afterNorm->Fill(dimuon.leading->Phi(), weight);
-      h_SingleMuonPt_afterNorm->Fill(dimuon.subleading->Pt(), weight);
-      h_SingleMuonEta_afterNorm->Fill(dimuon.subleading->Eta(), weight);
-      h_SingleMuonPhi_afterNorm->Fill(dimuon.subleading->Phi(), weight);
+      // After PU reweighting
+      h_SingleMuonPt_afterPU->Fill(dimuon.leading->Pt(), weight);
+      h_SingleMuonEta_afterPU->Fill(dimuon.leading->Eta(), weight);
+      h_SingleMuonPhi_afterPU->Fill(dimuon.leading->Phi(), weight);
+      h_SingleMuonPt_afterPU->Fill(dimuon.subleading->Pt(), weight);
+      h_SingleMuonEta_afterPU->Fill(dimuon.subleading->Eta(), weight);
+      h_SingleMuonPhi_afterPU->Fill(dimuon.subleading->Phi(), weight);
 
-      h_LeadingMuonPt_afterNorm->Fill(dimuon.leading->Pt(), weight);
-      h_LeadingMuonEta_afterNorm->Fill(dimuon.leading->Eta(), weight);
-      h_LeadingMuonPhi_afterNorm->Fill(dimuon.leading->Phi(), weight);
+      h_LeadingMuonPt_afterPU->Fill(dimuon.leading->Pt(), weight);
+      h_LeadingMuonEta_afterPU->Fill(dimuon.leading->Eta(), weight);
+      h_LeadingMuonPhi_afterPU->Fill(dimuon.leading->Phi(), weight);
 
-      h_SubleadingMuonPt_afterNorm->Fill(dimuon.subleading->Pt(), weight);
-      h_SubleadingMuonEta_afterNorm->Fill(dimuon.subleading->Eta(), weight);
-      h_SubleadingMuonPhi_afterNorm->Fill(dimuon.subleading->Phi(), weight);
+      h_SubleadingMuonPt_afterPU->Fill(dimuon.subleading->Pt(), weight);
+      h_SubleadingMuonEta_afterPU->Fill(dimuon.subleading->Eta(), weight);
+      h_SubleadingMuonPhi_afterPU->Fill(dimuon.subleading->Phi(), weight);
 
-      h_DimuonPt_afterNorm->Fill(dimuon.dimuon.Pt(), weight);
-      h_DimuonRapidity_afterNorm->Fill(dimuon.dimuon.Rapidity(), weight);
-      h_DimuonPhi_afterNorm->Fill(dimuon.dimuon.Phi(), weight);
-      h_DimuonMass_afterNorm->Fill(dimuon.dimuon.M(), weight);
+      h_DimuonPt_afterPU->Fill(dimuon.dimuon.Pt(), weight);
+      h_DimuonRapidity_afterPU->Fill(dimuon.dimuon.Rapidity(), weight);
+      h_DimuonPhi_afterPU->Fill(dimuon.dimuon.Phi(), weight);
+      h_DimuonMass_afterPU->Fill(dimuon.dimuon.M(), weight);
     }
   } // End of event loop
 
@@ -144,6 +154,17 @@ void Analyzer::Run()
 void Analyzer::End()
 {
   WriteHist();
+
+  // For PU Distribution
+  // auto* hMCReweighted = fPUReweighting->GetMCWeightedHist();
+  // TFile* out = new TFile("/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/PUDistribution.root", "RECREATE");
+  
+  // fPUReweighting->GetDataHist()->Write("hData");
+  // fPUReweighting->GetMCHist()->Write("hMC");
+  // hMCReweighted->Write("hMCReweighted");
+  
+  // out->Close();
+  // delete out;
 }
 
 void Analyzer::SetHist()
@@ -167,22 +188,22 @@ void Analyzer::SetHist()
   h_DimuonPhi = new TH1D("h_dimuon_phi", "Dimuon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
   h_DimuonMass = new TH1D("h_dimuon_mass", "Dimuon mass after z mass cut;m [GeV];Events", 10000, 0, 10000);
 
-  h_SingleMuonPt_afterNorm = new TH1D("h_singlemuon_pt_after_norm", "Single muon pT after z mass cut;p_{T} [GeV];Events", 10000, 0, 10000);
-  h_SingleMuonEta_afterNorm = new TH1D("h_singlemuon_eta_after_norm", "Single muon #eta after z mass cut;#eta;Events", 60, -3, 3);
-  h_SingleMuonPhi_afterNorm = new TH1D("h_singlemuon_phi_after_norm", "Single muon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
+  h_SingleMuonPt_afterPU = new TH1D("h_singlemuon_pt_after_pu", "Single muon pT after z mass cut;p_{T} [GeV];Events", 10000, 0, 10000);
+  h_SingleMuonEta_afterPU = new TH1D("h_singlemuon_eta_after_pu", "Single muon #eta after z mass cut;#eta;Events", 60, -3, 3);
+  h_SingleMuonPhi_afterPU = new TH1D("h_singlemuon_phi_after_pu", "Single muon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
 
-  h_LeadingMuonPt_afterNorm = new TH1D("h_leadingmuon_pt_after_norm", "Leading muon pT after z mass cut;p_{T} [GeV];Events", 10000, 0, 10000);
-  h_LeadingMuonEta_afterNorm = new TH1D("h_leadingmuon_eta_after_norm", "Leading muon #eta after z mass cut;#eta;Events", 60, -3, 3);
-  h_LeadingMuonPhi_afterNorm = new TH1D("h_leadingmuon_phi_after_norm", "Leading muon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
+  h_LeadingMuonPt_afterPU = new TH1D("h_leadingmuon_pt_after_pu", "Leading muon pT after z mass cut;p_{T} [GeV];Events", 10000, 0, 10000);
+  h_LeadingMuonEta_afterPU = new TH1D("h_leadingmuon_eta_after_pu", "Leading muon #eta after z mass cut;#eta;Events", 60, -3, 3);
+  h_LeadingMuonPhi_afterPU = new TH1D("h_leadingmuon_phi_after_pu", "Leading muon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
 
-  h_SubleadingMuonPt_afterNorm = new TH1D("h_subleadingmuon_pt_after_norm", "Subleading muon pT after z mass cut;p_{T} [GeV];Events", 10000, 0, 10000);
-  h_SubleadingMuonEta_afterNorm = new TH1D("h_subleadingmuon_eta_after_norm", "Subleading muon #eta after z mass cut;#eta;Events", 60, -3, 3);
-  h_SubleadingMuonPhi_afterNorm = new TH1D("h_subleadingmuon_phi_after_norm", "Subleading muon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
+  h_SubleadingMuonPt_afterPU = new TH1D("h_subleadingmuon_pt_after_pu", "Subleading muon pT after z mass cut;p_{T} [GeV];Events", 10000, 0, 10000);
+  h_SubleadingMuonEta_afterPU = new TH1D("h_subleadingmuon_eta_after_pu", "Subleading muon #eta after z mass cut;#eta;Events", 60, -3, 3);
+  h_SubleadingMuonPhi_afterPU = new TH1D("h_subleadingmuon_phi_after_pu", "Subleading muon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
   
-  h_DimuonPt_afterNorm = new TH1D("h_dimuon_pt_after_norm", "Dimuon pT after z mass cut;p_{T} [GeV];Events", 10000, 0, 10000);
-  h_DimuonRapidity_afterNorm = new TH1D("h_dimuon_rapidity_after_norm", "Dimuon rapidity after z mass cut;y;Events", 60, -3, 3);
-  h_DimuonPhi_afterNorm = new TH1D("h_dimuon_phi_after_norm", "Dimuon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
-  h_DimuonMass_afterNorm = new TH1D("h_dimuon_mass_after_norm", "Dimuon mass after z mass cut;m [GeV];Events", 10000, 0, 10000);
+  h_DimuonPt_afterPU = new TH1D("h_dimuon_pt_after_pu", "Dimuon pT after z mass cut;p_{T} [GeV];Events", 10000, 0, 10000);
+  h_DimuonRapidity_afterPU = new TH1D("h_dimuon_rapidity_after_pu", "Dimuon rapidity after z mass cut;y;Events", 60, -3, 3);
+  h_DimuonPhi_afterPU = new TH1D("h_dimuon_phi_after_pu", "Dimuon #phi after z mass cut;#phi;Events", 24, -M_PI, M_PI);
+  h_DimuonMass_afterPU = new TH1D("h_dimuon_mass_after_pu", "Dimuon mass after z mass cut;m [GeV];Events", 10000, 0, 10000);
 }
 
 void Analyzer::FillHist()
@@ -195,7 +216,7 @@ void Analyzer::WriteHist()
   TFile outputFile(fOutputName.c_str(), "RECREATE");
 
   h_TotalWeight->Write();
-  
+
   h_SingleMuonPt->Write();
   h_SingleMuonEta->Write();
   h_SingleMuonPhi->Write();
@@ -213,22 +234,22 @@ void Analyzer::WriteHist()
   h_DimuonPhi->Write();
   h_DimuonMass->Write();
 
-  h_SingleMuonPt_afterNorm->Write();
-  h_SingleMuonEta_afterNorm->Write();
-  h_SingleMuonPhi_afterNorm->Write();
+  h_SingleMuonPt_afterPU->Write();
+  h_SingleMuonEta_afterPU->Write();
+  h_SingleMuonPhi_afterPU->Write();
 
-  h_LeadingMuonPt_afterNorm->Write();
-  h_LeadingMuonEta_afterNorm->Write();
-  h_LeadingMuonPhi_afterNorm->Write();
+  h_LeadingMuonPt_afterPU->Write();
+  h_LeadingMuonEta_afterPU->Write();
+  h_LeadingMuonPhi_afterPU->Write();
 
-  h_SubleadingMuonPt_afterNorm->Write();
-  h_SubleadingMuonEta_afterNorm->Write();
-  h_SubleadingMuonPhi_afterNorm->Write();
+  h_SubleadingMuonPt_afterPU->Write();
+  h_SubleadingMuonEta_afterPU->Write();
+  h_SubleadingMuonPhi_afterPU->Write();
 
-  h_DimuonPt_afterNorm->Write();
-  h_DimuonRapidity_afterNorm->Write();
-  h_DimuonPhi_afterNorm->Write();
-  h_DimuonMass_afterNorm->Write();
+  h_DimuonPt_afterPU->Write();
+  h_DimuonRapidity_afterPU->Write();
+  h_DimuonPhi_afterPU->Write();
+  h_DimuonMass_afterPU->Write();
 
   outputFile.Close();
   
