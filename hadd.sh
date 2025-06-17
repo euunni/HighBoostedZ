@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_DIR="./output/250613_PUReweighting/root"
+BASE_DIR="./output/250613_L1PreFiring/root"
 # ERAS=("2016_postVFP" "2016_preVFP" "2017" "2018")
 ERAS=("2016_postVFP")
 

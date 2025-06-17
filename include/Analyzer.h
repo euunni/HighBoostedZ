@@ -62,22 +62,22 @@ private:
   TH1D* h_DimuonPhi;
   TH1D* h_DimuonMass;
 
-  TH1D* h_SingleMuonPt_afterPU;
-  TH1D* h_SingleMuonEta_afterPU;
-  TH1D* h_SingleMuonPhi_afterPU;
+  TH1D* h_SingleMuonPt_afterCorr;
+  TH1D* h_SingleMuonEta_afterCorr;
+  TH1D* h_SingleMuonPhi_afterCorr;
 
-  TH1D* h_LeadingMuonPt_afterPU;
-  TH1D* h_LeadingMuonEta_afterPU;
-  TH1D* h_LeadingMuonPhi_afterPU;
+  TH1D* h_LeadingMuonPt_afterCorr;
+  TH1D* h_LeadingMuonEta_afterCorr;
+  TH1D* h_LeadingMuonPhi_afterCorr;
 
-  TH1D* h_SubleadingMuonPt_afterPU;
-  TH1D* h_SubleadingMuonEta_afterPU;
-  TH1D* h_SubleadingMuonPhi_afterPU;
+  TH1D* h_SubleadingMuonPt_afterCorr;
+  TH1D* h_SubleadingMuonEta_afterCorr;
+  TH1D* h_SubleadingMuonPhi_afterCorr;
 
-  TH1D* h_DimuonPt_afterPU;
-  TH1D* h_DimuonRapidity_afterPU;
-  TH1D* h_DimuonPhi_afterPU;
-  TH1D* h_DimuonMass_afterPU;
+  TH1D* h_DimuonPt_afterCorr;
+  TH1D* h_DimuonRapidity_afterCorr;
+  TH1D* h_DimuonPhi_afterCorr;
+  TH1D* h_DimuonMass_afterCorr;
   
   void SetHist();
   void FillHist();

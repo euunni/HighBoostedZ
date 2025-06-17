@@ -37,6 +37,7 @@ public:
   void SetMC();
   TTreeReaderValue<float>* GetGenWeight() const { return genWeight; }
   TTreeReaderValue<float>* GetPU() const { return Pileup_nTrueInt; }
+  TTreeReaderValue<float>* GetL1PreFiringWeight() const { return L1PreFiringWeight_Nom; }
 
 private:
   TChain* fChain;
@@ -45,6 +46,7 @@ private:
   
   TTreeReaderValue<float>* genWeight;
   TTreeReaderValue<float>* Pileup_nTrueInt;
+  TTreeReaderValue<float>* L1PreFiringWeight_Nom;
 
   bool GetFile(const std::string& sampleName, const std::string& era, const int& idx, const int& filesPerJob);
 };
