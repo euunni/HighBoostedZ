@@ -2,6 +2,7 @@
 #define Muon_h
 
 #include "Utils/ConfigReader.h"
+#include "RoccoR.h"
 
 #include <iostream>
 #include <algorithm>
@@ -48,7 +49,9 @@ struct Selection {
 };
 
 struct DimuonPair {
-  const TLorentzVector* leading = nullptr;
+  int leadIdx = -1; // index of leading muon in vector (after selection)
+  int subIdx = -1;  // index of subleading muon
+  const TLorentzVector* leading = nullptr;  // Rochester-corrected 4-vec
   const TLorentzVector* subleading = nullptr;
   TLorentzVector dimuon;
   bool isValid = false;
@@ -66,6 +69,8 @@ public:
     Muon_tightId = nullptr;
     Muon_pfRelIso04_all = nullptr;
     Muon_nTrackerLayers = nullptr;
+    Muon_genPartIdx = nullptr;
+    GenPart_pt = nullptr;
   }
   ~Muon() {
     for (auto& pair : triggerMap) {
@@ -75,12 +80,13 @@ public:
   }
 
   void Init(TTreeReader* fReader);
-  std::vector<TLorentzVector> Get4Vec();
+  std::vector<TLorentzVector> Get4Vec(bool doRoch = true);
   std::vector<int> GetCharge();
   std::vector<std::string> GetTriggers(const Selection& config, const std::string& sampleName);
   bool PassTriggers(const std::vector<std::string>& triggerList);
   std::vector<std::pair<int, TLorentzVector>> GetSelectedMuons(const Selection& config);
   DimuonPair GetDimuon(const Selection& config);
+  void SetRoccoR(const RoccoR* rc, bool isMC, bool applyRoch = true);
 
 private:
   TTreeReaderArray<float>* Muon_pt;
@@ -91,10 +97,17 @@ private:
   TTreeReaderArray<bool>* Muon_tightId;
   TTreeReaderArray<float>* Muon_pfRelIso04_all;
   TTreeReaderArray<int>* Muon_nTrackerLayers;
+  TTreeReaderArray<int>* Muon_genPartIdx;
+  TTreeReaderArray<float>* GenPart_pt;
+
+  const RoccoR* fRoccor = nullptr;
+  bool fIsMC = false;
+  bool fApplyRoch = true;
 
   std::map<std::string, TTreeReaderValue<bool>*> triggerMap;
   std::vector<TLorentzVector> fMuon4Vec;
   std::vector<int> fMuonCharge;
+  std::vector<TLorentzVector> fMuon4VecRaw;  // raw 4-vectors (no Rochester)
 };
 
 #endif

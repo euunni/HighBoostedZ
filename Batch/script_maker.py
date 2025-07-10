@@ -14,15 +14,26 @@ def split_list(lst, split_size):
         yield lst[i:i + split_size]
 
 def create_jobs(era, sample, list_dir, files_per_job):
+
+    # Skip if input directory does not exist
+    if not os.path.isdir(list_dir):
+        print(f"[SKIP] input directory missing: {list_dir}")
+        return
+
+    input_files = parse_list(list_dir)
+
+    if not input_files:
+        print(f"[SKIP] No input ROOT files for sample '{sample}'. Job not created.")
+        return
+    
     base_dir = os.getcwd()
-    output_base = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250613_L1PreFiring/root/{era}/{sample}"
+    output_base = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250710_RoccoR_ChangeEvtWeight/root/{era}/{sample}"
     submit_dir = os.path.join(output_base, "Sub")
     log_dir = os.path.join(output_base, "Log")
 
     os.makedirs(submit_dir, exist_ok=True)
     os.makedirs(log_dir, exist_ok=True)
 
-    input_files = parse_list(list_dir)
     print(f"[INFO] Found {len(input_files)} input files for sample '{sample}'.")
 
     job_splits = list(split_list(input_files, files_per_job))

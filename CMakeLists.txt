@@ -28,6 +28,7 @@ add_library(AnalysisLib SHARED
   src/Muon.cc
   src/PUReweighting.cc
   src/Utils/ConfigReader.cc
+  src/RoccoR.cc
 )
 
 # Link ROOT libraries to the framework library

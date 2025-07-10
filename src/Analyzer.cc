@@ -1,6 +1,7 @@
 #include "Analyzer.h"
 #include "NtupleReader.h"
 #include "Muon.h"
+#include "RoccoR.h"
 
 #include <iostream>
 #include <math.h>
@@ -20,7 +21,7 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   // Load config
   std::string configPath = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/input/config/" + era + "/config.json";
   fConfig = Selection::Load(configPath);
-  
+
   int filesPerJob = 10; // default
   if (fConfig.j.contains("Processing") && fConfig.j["Processing"].contains("FilesPerJob")) {
     filesPerJob = fConfig.j["Processing"]["FilesPerJob"].get<int>();
@@ -29,8 +30,14 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   fIsMC = fConfig.j["IsMC"].contains(sampleName) ? 
           fConfig.j["IsMC"][sampleName].get<bool>() : true;  
 
-  std::string dataPU = fConfig.j["PU"]["Data"].get<std::string>();
-  std::string mcPU = fConfig.j["PU"]["MC"].get<std::string>();
+  // Load correction switches from config
+  if (fConfig.j.contains("Corrections")) {
+    auto& cs = fConfig.j["Corrections"];
+    if (cs.contains("RoccoR")) fCorr.doRoch = cs["RoccoR"].get<bool>();
+    if (cs.contains("PU"))        fCorr.doPU   = cs["PU"].get<bool>();
+    if (cs.contains("L1Prefire")) fCorr.doL1Pre= cs["L1Prefire"].get<bool>();
+    if (cs.contains("Norm"))      fCorr.doNorm = cs["Norm"].get<bool>();
+  }
 
   // Initialize ntuple reader
   fNtupleReader = std::make_unique<NtupleReader>();
@@ -43,14 +50,21 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   fMuon = std::make_unique<Muon>();
   fMuon->Init(fReader);
 
-  // Get pualization factor
-  fNormFactor = ConfigReader::GetNormFactor(fConfig.j, fSampleName);
+  // Initialize RoccoR (for Rochester muon momentum correction)
+  std::string roccoRPath = fConfig.j["RoccoR"]["File"].get<std::string>();
+  fRoccoR = std::make_unique<RoccoR>(roccoRPath);
+  fMuon->SetRoccoR(fRoccoR.get(), fIsMC, fCorr.doRoch);
+
+  // Get normalization factor
+  // fNormFactor = ConfigReader::GetNormFactor(fConfig.j, fSampleName);
 
   // Initialize PU reweighting
+  std::string dataPU = fConfig.j["PU"]["Data"].get<std::string>();
+  std::string mcPU = fConfig.j["PU"]["MC"].get<std::string>();
   fPUReweighting = std::make_unique<PUReweighting>(dataPU, mcPU);
 
   // Set output file
-  std::string baseDir = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250613_L1PreFiring/root";
+  std::string baseDir = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250710_RoccoR_ChangeEvtWeight/root";
   system(("mkdir -p " + baseDir + "/" + era + "/" + sampleName).c_str());
   fOutputName = baseDir + "/" + era + "/" + sampleName + "/" + sampleName + "_" + std::to_string(idx) + ".root";
 
@@ -68,7 +82,7 @@ void Analyzer::Run()
   std::cout << "Processing " << fSampleName << " (" << fEra << ") with " << nEntries << " events" << std::endl;
 
   double totalWeight = 0.;
-  bool isNNLO = (sample.find("NNLO") != std::string::npos);
+  // bool isNNLO = (sample.find("NNLO") != std::string::npos);
 
 
   // Event loop
@@ -85,9 +99,10 @@ void Analyzer::Run()
 
     if (fIsMC) {
       evtWeight = **(fNtupleReader->GetGenWeight());
-      if (isNNLO) {
-        evtWeight = (evtWeight > 0) ? 1. : -1.;
-      }
+      // if (isNNLO) {
+      //   evtWeight = (evtWeight > 0) ? 1. : -1.;
+      // }
+      evtWeight = (evtWeight > 0) ? 1. : -1.;
 
       puWeight = fPUReweighting->GetWeight(**(fNtupleReader->GetPU()));
       l1PreWeight = **(fNtupleReader->GetL1PreFiringWeight());
@@ -102,11 +117,14 @@ void Analyzer::Run()
     }
 
     // Find dimuons passing all selection criteria
-    double weight = evtWeight * fNormFactor * puWeight * l1PreWeight;
-    auto dimuon = fMuon->GetDimuon(fConfig);
+    double weight = evtWeight;
+    // if (fCorr.doNorm) weight *= fNormFactor;
+    if (fCorr.doPU) weight *= puWeight;
+    if (fCorr.doL1Pre) weight *= l1PreWeight;
 
+    auto dimuon = fMuon->GetDimuon(fConfig);
     if (dimuon.isValid) {
-      // Before pualization 
+      // Before correction
       h_SingleMuonPt->Fill(dimuon.leading->Pt(), evtWeight);
       h_SingleMuonEta->Fill(dimuon.leading->Eta(), evtWeight);
       h_SingleMuonPhi->Fill(dimuon.leading->Phi(), evtWeight);
@@ -127,7 +145,7 @@ void Analyzer::Run()
       h_DimuonPhi->Fill(dimuon.dimuon.Phi(), evtWeight);
       h_DimuonMass->Fill(dimuon.dimuon.M(), evtWeight);
 
-      // After PU reweighting
+      // After correction
       h_SingleMuonPt_afterCorr->Fill(dimuon.leading->Pt(), weight);
       h_SingleMuonEta_afterCorr->Fill(dimuon.leading->Eta(), weight);
       h_SingleMuonPhi_afterCorr->Fill(dimuon.leading->Phi(), weight);

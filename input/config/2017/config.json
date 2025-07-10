@@ -11,6 +11,13 @@
     "ZMass": [60, 120]
   },
 
+  "Corrections": {
+    "RoccoR": true,
+    "PU": true,
+    "L1Prefire": true,
+    "Norm": false
+  },
+
   "Processing": {
     "FilesPerJob": 10
   },
@@ -26,5 +33,9 @@
   "PU": {
     "Data": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/Pileup/Data/PileupHistogram-goldenJSON-13tev-2017-69200ub-99bins.root",
     "MC": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/Pileup/MC/MC_2017.root"
+  },
+
+  "RoccoR": {
+    "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/RoccoR/RoccoR2017UL.txt"
   }
 }
