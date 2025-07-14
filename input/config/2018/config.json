@@ -13,9 +13,10 @@
 
   "Corrections": {
     "RoccoR": true,
+    "Norm": false,
     "PU": true,
-    "L1Prefire": true,
-    "Norm": false
+    "L1Prefire": true, 
+    "EffSF": true
   },
 
   "Processing": {
@@ -29,12 +30,21 @@
     "SingleMuon_Run2018D": false
   },
 
-  "PU": {
-    "Data": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/Pileup/Data/PileupHistogram-goldenJSON-13tev-2018-69200ub-99bins.root",
-    "MC": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/Pileup/MC/MC_2018.root"
-  },
-
-  "RoccoR": {
-    "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/RoccoR/RoccoR2018UL.txt"
+  "EffSF": {
+    "ID": {
+      "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2018_UL_ID.root",
+      "HistData": "NUM_TightID_DEN_TrackerMuons_abseta_pt_efficiencyData",
+      "HistMC": "NUM_TightID_DEN_TrackerMuons_abseta_pt_efficiencyMC"
+    },
+    "ISO": {
+      "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2018_UL_ISO.root",
+      "HistData": "NUM_TightRelIso_DEN_TightIDandIPCut_abseta_pt_efficiencyData",
+      "HistMC": "NUM_TightRelIso_DEN_TightIDandIPCut_abseta_pt_efficiencyMC"
+    },
+    "Trigger": {
+      "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2018_UL_Trigger.root",
+      "HistData": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight_abseta_pt_efficiencyData",
+      "HistMC": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight_abseta_pt_efficiencyMC"
+    }
   }
 }

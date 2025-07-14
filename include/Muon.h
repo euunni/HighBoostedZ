@@ -88,6 +88,9 @@ public:
   DimuonPair GetDimuon(const Selection& config);
   void SetRoccoR(const RoccoR* rc, bool isMC, bool applyRoch = true);
 
+  // Access raw, uncorrected muon four-vectors (available after Get4Vec is called at least once in event)
+  const std::vector<TLorentzVector>& GetRaw4Vec() const { return fMuon4VecRaw; }
+
 private:
   TTreeReaderArray<float>* Muon_pt;
   TTreeReaderArray<float>* Muon_eta;

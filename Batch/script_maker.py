@@ -27,7 +27,7 @@ def create_jobs(era, sample, list_dir, files_per_job):
         return
     
     base_dir = os.getcwd()
-    output_base = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250710_RoccoR_ChangeEvtWeight/root/{era}/{sample}"
+    output_base = f"/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250711_EffSF/root/{era}/{sample}"
     submit_dir = os.path.join(output_base, "Sub")
     log_dir = os.path.join(output_base, "Log")
 

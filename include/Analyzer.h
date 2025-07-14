@@ -6,6 +6,7 @@
 #include "Muon.h"
 #include "PUReweighting.h"
 #include "RoccoR.h"
+#include "EffSF.h"
 
 #include <string>
 #include <vector>
@@ -44,13 +45,10 @@ private:
   double fNormFactor;
   std::unique_ptr<PUReweighting> fPUReweighting;
   std::unique_ptr<RoccoR> fRoccoR;
-  
-  struct CorrSwitch {
-    bool doRoch = true;
-    bool doPU = true;
-    bool doL1Pre = true;
-    bool doNorm = true;
-  } fCorr;
+  std::unique_ptr<EffSF> fEffSF;
+
+  std::vector<std::string> fTriggerList; // cached trigger list per sample
+  CorrSwitch fCorr;
   
   TH1D* h_TotalWeight;
 

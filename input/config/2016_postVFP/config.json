@@ -6,34 +6,27 @@
     "Id": "Tight",
     "PFIso": 0.15,
     "Trigger": {
-      "Default": [
-        "HLT_IsoMu24",
-        "HLT_IsoTkMu24"
-      ]
+      "Default": ["HLT_IsoMu24", "HLT_IsoTkMu24"]
     },
     "ZMass": [
-      60,
-      120
+      60, 120
     ]
   },
-
   "Corrections": {
     "RoccoR": true,
+    "Norm": false,
     "PU": true,
     "L1Prefire": true,
-    "Norm": false
+    "EffSF": true
   },
-
   "Processing": {
     "FilesPerJob": 10
   },
-
   "IsMC": {
     "SingleMuon_Run2016F": false,
     "SingleMuon_Run2016G": false,
     "SingleMuon_Run2016H": false
   },
-
   "Normalization": {
     "DYJetsToMuMu_M-50": 0.462908,
     "DYJetsToTauTau_M-50_AtLeastOneEorMuDecay": 0.154082,
@@ -48,13 +41,28 @@
     "WZ": 0.061117,
     "ZZ": 0.177633
   },
-
   "PU": {
     "Data": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/Pileup/Data/PileupHistogram-goldenJSON-13tev-2016-postVFP-69200ub-99bins.root",
     "MC": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/Pileup/MC/MC_2016.root"
   },
-  
   "RoccoR": {
     "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/RoccoR/RoccoR2016bUL.txt"
+  },
+  "EffSF": {
+    "ID": {
+      "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2016_UL_postVFP_ID.root",
+      "HistData": "NUM_TightID_DEN_TrackerMuons_abseta_pt_efficiencyData",
+      "HistMC": "NUM_TightID_DEN_TrackerMuons_abseta_pt_efficiencyMC"
+    },
+    "ISO": {
+      "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2016_UL_postVFP_ISO.root",
+      "HistData": "NUM_TightRelIso_DEN_TightIDandIPCut_abseta_pt_efficiencyData",
+      "HistMC": "NUM_TightRelIso_DEN_TightIDandIPCut_abseta_pt_efficiencyMC"
+    },
+    "Trigger": {
+      "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2016_UL_postVFP_Trigger.root",
+      "HistData": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight_abseta_pt_efficiencyData",
+      "HistMC": "NUM_IsoMu24_or_IsoTkMu24_DEN_CutBasedIdTight_and_PFIsoTight_abseta_pt_efficiencyMC"
+    }
   }
 }

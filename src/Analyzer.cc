@@ -2,6 +2,7 @@
 #include "NtupleReader.h"
 #include "Muon.h"
 #include "RoccoR.h"
+#include "EffSF.h"
 
 #include <iostream>
 #include <math.h>
@@ -22,26 +23,13 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   std::string configPath = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/input/config/" + era + "/config.json";
   fConfig = Selection::Load(configPath);
 
-  int filesPerJob = 10; // default
-  if (fConfig.j.contains("Processing") && fConfig.j["Processing"].contains("FilesPerJob")) {
-    filesPerJob = fConfig.j["Processing"]["FilesPerJob"].get<int>();
-  }
-
-  fIsMC = fConfig.j["IsMC"].contains(sampleName) ? 
-          fConfig.j["IsMC"][sampleName].get<bool>() : true;  
-
-  // Load correction switches from config
-  if (fConfig.j.contains("Corrections")) {
-    auto& cs = fConfig.j["Corrections"];
-    if (cs.contains("RoccoR")) fCorr.doRoch = cs["RoccoR"].get<bool>();
-    if (cs.contains("PU"))        fCorr.doPU   = cs["PU"].get<bool>();
-    if (cs.contains("L1Prefire")) fCorr.doL1Pre= cs["L1Prefire"].get<bool>();
-    if (cs.contains("Norm"))      fCorr.doNorm = cs["Norm"].get<bool>();
-  }
+  int filesPerJob = ConfigReader::ReadFilesPerJob(fConfig.j);
 
   // Initialize ntuple reader
   fNtupleReader = std::make_unique<NtupleReader>();
   fNtupleReader->Init(sampleName, era, idx, filesPerJob);
+
+  fIsMC = ConfigReader::ReadIsMC(fConfig.j, sampleName);  
   if (fIsMC) {
     fNtupleReader->SetMC();
   }
@@ -51,20 +39,21 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   fMuon->Init(fReader);
 
   // Initialize RoccoR (for Rochester muon momentum correction)
-  std::string roccoRPath = fConfig.j["RoccoR"]["File"].get<std::string>();
+  fCorr = ConfigReader::ReadCorrections(fConfig.j);
+  std::string roccoRPath = ConfigReader::ReadRoccoRPath(fConfig.j);
   fRoccoR = std::make_unique<RoccoR>(roccoRPath);
   fMuon->SetRoccoR(fRoccoR.get(), fIsMC, fCorr.doRoch);
 
-  // Get normalization factor
-  // fNormFactor = ConfigReader::GetNormFactor(fConfig.j, fSampleName);
-
   // Initialize PU reweighting
-  std::string dataPU = fConfig.j["PU"]["Data"].get<std::string>();
-  std::string mcPU = fConfig.j["PU"]["MC"].get<std::string>();
+  auto [dataPU, mcPU] = ConfigReader::ReadPU(fConfig.j);
   fPUReweighting = std::make_unique<PUReweighting>(dataPU, mcPU);
 
+  // Initialize efficiency scale factors (EffSF)
+  auto [idFile, isoFile, trigFile, histNames] = ConfigReader::ReadEffSF(fConfig.j);
+  fEffSF = std::make_unique<EffSF>(idFile, isoFile, trigFile, histNames);
+
   // Set output file
-  std::string baseDir = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250710_RoccoR_ChangeEvtWeight/root";
+  std::string baseDir = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250711_EffSF/root";
   system(("mkdir -p " + baseDir + "/" + era + "/" + sampleName).c_str());
   fOutputName = baseDir + "/" + era + "/" + sampleName + "/" + sampleName + "_" + std::to_string(idx) + ".root";
 
@@ -82,7 +71,6 @@ void Analyzer::Run()
   std::cout << "Processing " << fSampleName << " (" << fEra << ") with " << nEntries << " events" << std::endl;
 
   double totalWeight = 0.;
-  // bool isNNLO = (sample.find("NNLO") != std::string::npos);
 
 
   // Event loop
@@ -97,11 +85,9 @@ void Analyzer::Run()
     double puWeight = 1.;
     double l1PreWeight = 1.;
 
+    // MC-specific weights and corrections
     if (fIsMC) {
       evtWeight = **(fNtupleReader->GetGenWeight());
-      // if (isNNLO) {
-      //   evtWeight = (evtWeight > 0) ? 1. : -1.;
-      // }
       evtWeight = (evtWeight > 0) ? 1. : -1.;
 
       puWeight = fPUReweighting->GetWeight(**(fNtupleReader->GetPU()));
@@ -111,18 +97,35 @@ void Analyzer::Run()
     totalWeight += evtWeight;
 
     // Trigger selection
-    std::vector<std::string> triggerList = fMuon->GetTriggers(fConfig, fSampleName);
-    if (!(fMuon->PassTriggers(triggerList))) {
+    fTriggerList = fMuon->GetTriggers(fConfig, fSampleName);
+    if (!(fMuon->PassTriggers(fTriggerList))) {
       continue;
     }
 
     // Find dimuons passing all selection criteria
-    double weight = evtWeight;
-    // if (fCorr.doNorm) weight *= fNormFactor;
-    if (fCorr.doPU) weight *= puWeight;
-    if (fCorr.doL1Pre) weight *= l1PreWeight;
-
     auto dimuon = fMuon->GetDimuon(fConfig);
+    
+    // Calculate final weight
+    double weight = evtWeight;
+
+    if (fIsMC) {
+      if (fCorr.doPU) weight *= puWeight;
+      if (fCorr.doL1Pre) weight *= l1PreWeight;
+      if (fCorr.doEffSF && fEffSF && dimuon.isValid) {
+        const auto& raw4Vec = fMuon->Get4Vec(false);  // Use raw 4-vectors (before Rochester correction)
+        
+        double effSFIDLeading = fEffSF->GetIDSF(raw4Vec[dimuon.leadIdx]);
+        double effSFIDSubLeading = fEffSF->GetIDSF(raw4Vec[dimuon.subIdx]);
+        double effSFISOLeading = fEffSF->GetISOSF(raw4Vec[dimuon.leadIdx]);
+        double effSFISOSubLeading = fEffSF->GetISOSF(raw4Vec[dimuon.subIdx]);
+        double effSFTrigger = fEffSF->GetTrigSF(raw4Vec[dimuon.leadIdx], raw4Vec[dimuon.subIdx]);
+
+        double effSF = (effSFIDLeading * effSFIDSubLeading) * (effSFISOLeading * effSFISOSubLeading) * effSFTrigger;
+        
+        weight *= effSF;
+      }
+    }
+
     if (dimuon.isValid) {
       // Before correction
       h_SingleMuonPt->Fill(dimuon.leading->Pt(), evtWeight);

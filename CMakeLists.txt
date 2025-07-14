@@ -29,6 +29,7 @@ add_library(AnalysisLib SHARED
   src/PUReweighting.cc
   src/Utils/ConfigReader.cc
   src/RoccoR.cc
+  src/EffSF.cc
 )
 
 # Link ROOT libraries to the framework library
