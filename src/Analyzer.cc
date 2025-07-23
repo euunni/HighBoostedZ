@@ -37,6 +37,7 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
 
   fMuon = std::make_unique<Muon>();
   fMuon->Init(fReader);
+  fTriggerList = fMuon->GetTriggers(fConfig, fSampleName);
 
   // Initialize RoccoR (for Rochester muon momentum correction)
   fCorr = ConfigReader::ReadCorrections(fConfig.j);
@@ -53,7 +54,7 @@ bool Analyzer::Init(const std::string& sampleName, const std::string& era, const
   fEffSF = std::make_unique<EffSF>(idFile, isoFile, trigFile, histNames);
 
   // Set output file
-  std::string baseDir = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250711_EffSF/root";
+  std::string baseDir = "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/output/250722_EffSF_ChangeHist/root";
   system(("mkdir -p " + baseDir + "/" + era + "/" + sampleName).c_str());
   fOutputName = baseDir + "/" + era + "/" + sampleName + "/" + sampleName + "_" + std::to_string(idx) + ".root";
 
@@ -97,7 +98,6 @@ void Analyzer::Run()
     totalWeight += evtWeight;
 
     // Trigger selection
-    fTriggerList = fMuon->GetTriggers(fConfig, fSampleName);
     if (!(fMuon->PassTriggers(fTriggerList))) {
       continue;
     }
@@ -105,9 +105,7 @@ void Analyzer::Run()
     // Find dimuons passing all selection criteria
     auto dimuon = fMuon->GetDimuon(fConfig);
     
-    // Calculate final weight
     double weight = evtWeight;
-
     if (fIsMC) {
       if (fCorr.doPU) weight *= puWeight;
       if (fCorr.doL1Pre) weight *= l1PreWeight;
@@ -121,6 +119,12 @@ void Analyzer::Run()
         double effSFTrigger = fEffSF->GetTrigSF(raw4Vec[dimuon.leadIdx], raw4Vec[dimuon.subIdx]);
 
         double effSF = (effSFIDLeading * effSFIDSubLeading) * (effSFISOLeading * effSFISOSubLeading) * effSFTrigger;
+
+        // std::cout << "Evt: " << entry << "--------------------------------" << std::endl;
+        // std::cout << "IDLeading: " << effSFIDLeading << " IDSubLeading: " << effSFIDSubLeading
+        //           << "\nISOLeading: " << effSFISOLeading << " ISOSubLeading: " << effSFISOSubLeading
+        //           << "\nTrigger: " << effSFTrigger
+        //           << "\nEffSF: " << effSF << "\n" << std::endl;
         
         weight *= effSF;
       }

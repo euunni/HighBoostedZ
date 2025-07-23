@@ -43,13 +43,11 @@
   "EffSF": {
     "ID": {
       "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2016_UL_preVFP_ID.root",
-      "HistData": "NUM_TightID_DEN_TrackerMuons_abseta_pt_efficiencyData",
-      "HistMC": "NUM_TightID_DEN_TrackerMuons_abseta_pt_efficiencyMC"
+      "Hist": "NUM_TightID_DEN_TrackerMuons_abseta_pt"
     },
     "ISO": {
       "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2016_UL_preVFP_ISO.root",
-      "HistData": "NUM_TightRelIso_DEN_TightIDandIPCut_abseta_pt_efficiencyData",
-      "HistMC": "NUM_TightRelIso_DEN_TightIDandIPCut_abseta_pt_efficiencyMC"
+      "Hist": "NUM_TightRelIso_DEN_TightIDandIPCut_abseta_pt"
     },
     "Trigger": {
       "File": "/u/user/haeun/CMSAnalysis/HighBoostedZ/Validation/HighBoostedZ/EffSF/Run2016_UL_preVFP_Trigger.root",

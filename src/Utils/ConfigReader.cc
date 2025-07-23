@@ -101,10 +101,8 @@ std::tuple<std::string, std::string, std::string, std::map<std::string, std::str
   auto& effSF = config["EffSF"];
   
   std::map<std::string, std::string> histNames = {
-    {"ID_Data", effSF["ID"]["HistData"].get<std::string>()},
-    {"ID_MC", effSF["ID"]["HistMC"].get<std::string>()},
-    {"ISO_Data", effSF["ISO"]["HistData"].get<std::string>()},
-    {"ISO_MC", effSF["ISO"]["HistMC"].get<std::string>()},
+    {"ID", effSF["ID"]["Hist"].get<std::string>()},
+    {"ISO", effSF["ISO"]["Hist"].get<std::string>()},
     {"Trigger_Data", effSF["Trigger"]["HistData"].get<std::string>()},
     {"Trigger_MC", effSF["Trigger"]["HistMC"].get<std::string>()}
   };
